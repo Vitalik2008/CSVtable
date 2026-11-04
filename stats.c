@@ -9,17 +9,17 @@
 #include "stats.h"
 #include "csv_parser.h"
 
-static void print_quoted_name(const char *field) {
-    printf("\"");
+static void print_quoted_name(FILE *output, const char *field) {
+    fprintf(output,"\"");
 
     for (int i = 0; field[i]!='\0'; i++){
         if (field[i]=='"'){
-            printf("\"");
+            fprintf(output,"\"");
         }
 
-        printf("%c", field[i]);
+        fprintf(output,"%c", field[i]);
     }
-    printf("\"");
+    fprintf(output,"\"");
 }
 
 static int parse_int64(const char *value, int64_t *result) {
@@ -154,50 +154,50 @@ void update_double_stats(ColumnStats *stats, const char *value) {
 
 }
 
-void print_stats(const CsvTable *table) {
-    printf("rows %zu\n", table->row_count);
-    printf("columns %zu\n", table->column_count);
+void print_stats(FILE *output, const CsvTable *table) {
+    fprintf(output,"rows %zu\n", table->row_count);
+    fprintf(output,"columns %zu\n", table->column_count);
 
     for (size_t i = 0; i<table->column_count; i++) {
         ColumnType type = table->column_types[i];
         ColumnStats *stats = &table->column_stats[i];
 
-        printf("column %zu\n", i);
-        printf("name ");
-        print_quoted_name(table->header_names[i]);
-        printf("\ntype %s\n", type_to_string(table->column_types[i]));
+        fprintf(output,"column %zu\n", i);
+        fprintf(output,"name ");
+        print_quoted_name(output, table->header_names[i]);
+        fprintf(output,"\ntype %s\n", type_to_string(table->column_types[i]));
         switch (type)
         {
         case TYPE_NULL:
-            printf("rows %zu\n\n", table->row_count );
+            fprintf(output,"rows %zu\n\n", table->row_count );
             break;
 
         case TYPE_INT:
-            printf("nulls %zu\n", stats->nulls);
-            printf("min %"PRId64"\n", stats->int_min);
-            printf("max %"PRId64"\n", stats->int_max);
-            printf("mean %.6Lf\n", stats->int_sum / stats->int_count);
-            printf("positive %zu\n", stats->int_positive);
-            printf("negative %zu\n", stats->int_negative);
-            printf("even %zu\n\n", stats->int_even);
+            fprintf(output,"nulls %zu\n", stats->nulls);
+            fprintf(output,"min %"PRId64"\n", stats->int_min);
+            fprintf(output,"max %"PRId64"\n", stats->int_max);
+            fprintf(output,"mean %.6Lf\n", stats->int_sum / stats->int_count);
+            fprintf(output,"positive %zu\n", stats->int_positive);
+            fprintf(output,"negative %zu\n", stats->int_negative);
+            fprintf(output,"even %zu\n\n", stats->int_even);
             break;
         
         case TYPE_DOUBLE:
-            printf("nulls %zu\n", stats->nulls);
-            printf("min %.6Lf\n", stats->double_min);
-            printf("max %.6Lf\n", stats->double_max);
-            printf("mean %.6Lf\n", stats->double_sum/stats->double_count);
-            printf("positive %zu\n", stats->double_positive);
-            printf("negative %zu\n", stats->double_negative);
-            printf("integer %zu\n\n", stats->double_integer);
+            fprintf(output,"nulls %zu\n", stats->nulls);
+            fprintf(output,"min %.6Lf\n", stats->double_min);
+            fprintf(output,"max %.6Lf\n", stats->double_max);
+            fprintf(output,"mean %.6Lf\n", stats->double_sum/stats->double_count);
+            fprintf(output,"positive %zu\n", stats->double_positive);
+            fprintf(output,"negative %zu\n", stats->double_negative);
+            fprintf(output,"integer %zu\n\n", stats->double_integer);
             break;
         
         case TYPE_STRING:
-            printf("nulls %zu\n", stats->nulls);
-            printf("min_length %zu\n", stats->min_length);
-            printf("max_length %zu\n", stats->max_length);
-            printf("mean_length %.6Lf\n", stats->total_length / stats->non_nulls);
-            printf("empty %zu\n\n", stats->empty);
+            fprintf(output,"nulls %zu\n", stats->nulls);
+            fprintf(output,"min_length %zu\n", stats->min_length);
+            fprintf(output,"max_length %zu\n", stats->max_length);
+            fprintf(output,"mean_length %.6Lf\n", stats->total_length / stats->non_nulls);
+            fprintf(output,"empty %zu\n\n", stats->empty);
             break;
         }
     }
