@@ -15,3 +15,9 @@ jobs:
 
       - name: Check help
         run: ./csvstat --help
+
+      - name: Check stats
+        run: ./csvstat schema 04_002_basic.csv
+
+      - name: Check stats
+        run: ./csvstat stats 04_002_basic.csv

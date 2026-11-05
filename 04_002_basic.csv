@@ -1,3 +1,5 @@
-a
--0.0
-3.0
+Name,Age,Score,City
+Alexander,18,95.5,Moscow
+Elizabeth,20,87.25,London
+Konstantin,19,,Berlin
+Anna,,91.0,Paris
