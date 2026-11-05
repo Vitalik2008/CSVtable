@@ -38,6 +38,8 @@ int csv_parser(FILE *input, CsvTable *result) {
 
     int header_fields = 0;
     int header_progress=0;
+    int count_empty_lines = 0;
+    int line_has_chars = 0;
 
     int header_count=0;
     int header_capacity=4;
@@ -63,6 +65,9 @@ int csv_parser(FILE *input, CsvTable *result) {
 
 
     while ((cha=fgetc(input))!= EOF) {
+        if (cha!='\n') {
+            line_has_chars = 1;
+        }
         if (cha == ',' && now!=QUOTED) {
             fields++;
             if (now==UNQUOTED && length>0){
@@ -166,6 +171,41 @@ int csv_parser(FILE *input, CsvTable *result) {
                 cleanup(NULL, field, header_names, header_count, column_types, column_stats);
                 return 1;
             }
+            if (line_has_chars ==0) {
+                if (header_progress==0) {
+                    fprintf(stderr, "Пустая строка до заголовка");
+                    cleanup(NULL, field, header_names, header_count,column_types, column_stats);
+                    return 1;
+                }
+
+                count_empty_lines++;
+
+                length = 0;
+                field[0]='\0';
+                fields=1;
+                column_index=0;
+                now=FIELD_START;
+                was_quoted=0;
+                line_has_chars=0;
+
+                continue;
+            }
+            if (count_empty_lines > 0) {
+                if (header_fields!=1) {
+                    fprintf(stderr, "Ошибка в файле");
+                    cleanup(NULL, field, header_names, header_count, column_types, column_stats);
+                    return 1;
+                }
+                while (count_empty_lines > 0) {
+                    for (int i = 0;  i <header_fields; i++) {
+                        column_stats[i].nulls++;
+                    }
+
+                    result->row_count++;
+                    count_empty_lines--;
+                }
+            }
+
             if (header_progress == 0) {
                 if (length==0) {
                     cleanup(NULL, field, header_names, header_count, column_types, column_stats);
@@ -241,6 +281,7 @@ int csv_parser(FILE *input, CsvTable *result) {
             column_index=0;
             now=FIELD_START;
             was_quoted=0;
+            line_has_chars=0;
         }
         else {
             if (now==AFTER_QUOTE) {
@@ -270,6 +311,21 @@ int csv_parser(FILE *input, CsvTable *result) {
         
     }
     if (pcha!='\n') {
+        if (count_empty_lines > 0) {
+            if (header_fields!=1) {
+                fprintf(stderr, "Ошибка в файле");
+                cleanup(NULL, field, header_names, header_count, column_types, column_stats);
+                return 1;
+            }
+            while (count_empty_lines > 0) {
+                for (int i = 0;  i <header_fields; i++) {
+                    column_stats[i].nulls++;
+                }
+
+                result->row_count++;
+                count_empty_lines--;
+            }
+        }
         if (now==UNQUOTED && length>0){
             while(length>0 && (field[length-1]==' ' || field[length-1] == '\t')){
                 length--;

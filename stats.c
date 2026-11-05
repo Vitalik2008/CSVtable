@@ -126,6 +126,8 @@ void update_double_stats(ColumnStats *stats, const char *value) {
     if (!parse_double(value, &number)) {
         return;
     }
+    
+    if (number == 0) number = 0.0L;
 
     if (stats->double_count==0) {
         stats->double_min=number;

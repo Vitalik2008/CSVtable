@@ -2,6 +2,7 @@
 #define STATS_H
 
 #include <stdio.h>
+#include "columns.h"
 
 typedef struct CsvTable CsvTable;
 

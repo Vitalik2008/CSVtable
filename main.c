@@ -21,7 +21,6 @@ void print_quoted_name(const char *field) {
 }
 
 int main(int argc, char *argv[]) {
-    system("chcp 65001 > nul"); 
     if (argc>=2 && strcmp(argv[1],"--help")==0){
         if(argc!=2) {
             fprintf(stderr, "Лишние аргументы после --help\n");
@@ -35,7 +34,7 @@ int main(int argc, char *argv[]) {
 
         return 0;
     }
-    if ((argc < 3) || (strcmp(argv[1],"report")==0 && argc<4)){
+    if (argc < 3){
         fprintf(stderr, "Недостаточно аргументов\n");
         return 2;
     }
@@ -44,6 +43,16 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Неизвестная команда: %s\n", argv[1]);
         return 2;
     }
+
+    int need = 0; 
+    if (strcmp(argv[1], "report")==0) need = 4;
+    else need=3;
+
+    if (argc!=need) {
+        fprintf(stderr, "Неверное кол-во аргументов\n");
+        return 2;
+    }
+
     FILE *input = fopen(argv[2], "r");
 
     if (input == NULL) {
