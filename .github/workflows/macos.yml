@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Compile
-        run: clang -std=c11 -Wall -Wextra -Wpedantic -g main.c csv_parser.c column.c cleanup.c stats.c -o csvstat
+        run: clang -std=c11 -Wall -Wextra -Wpedantic -g main.c csv_parser.c column.c cleanup.c stats.c report.c -o csvstat
 
       - name: Check help
         run: ./csvstat --help
